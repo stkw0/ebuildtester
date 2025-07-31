@@ -192,9 +192,14 @@ class Docker:
             docker_args += ["--volume=%s:%s" % o]
 
         docker_args += [docker_image]
+
+        # for compatibility with podman
+        e = os.environ.copy()
+        e["PODMAN_USERNS"] = "keep-id:uid=0"
+
         options.log.info("creating docker container with: %s" %
                          " ".join(docker_args))
-        docker = subprocess.Popen(docker_args, stdout=subprocess.PIPE)
+        docker = subprocess.Popen(docker_args, stdout=subprocess.PIPE, env=e)
         docker.wait()
 
         if docker.returncode != 0:
@@ -261,6 +266,9 @@ class Docker:
 
         # Avoid wasting time generating the whole set
         self.execute('echo "C.UTF-8 UTF-8" > /etc/locale.gen')
+
+        # Use callers UID as portage UID for compatibility with podman
+        self.execute(f'sed -i "s/250/{os.getuid()}/g" /etc/passwd')
 
     def _get_repo_names(self, overlay_dirs):
         """Get repo names from local overlay settings."""
