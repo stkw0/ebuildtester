@@ -25,7 +25,7 @@ Install `ebuildtester` in the `virtualenv`:
 
 .. code-block:: console
 
-    $ (venv) python setup.py install
+    $ (venv) pip install .
 
 Run the development version:
 
